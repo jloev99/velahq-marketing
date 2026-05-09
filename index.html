@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vela — AI Proposals for Creative Agencies</title>
+  <meta name="description" content="Generate client-ready proposals in 60 seconds. Collect deposits automatically. Win more business with every proposal you send." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset + Variables ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #0f0f0d;
+      --cream:  #f5f0e8;
+      --warm:   #e8e0d0;
+      --gold:   #b8965a;
+      --gold-l: #d4b07a;
+      --muted:  #7a7265;
+      --border: rgba(15,15,13,0.1);
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --sans:   'DM Sans', system-ui, sans-serif;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--cream);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Animations ────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%       { transform: translateY(-12px) rotate(1.5deg); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes pulse-ring {
+      0%   { transform: scale(1); opacity: 0.4; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .fade-up {
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards;
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.35s; }
+    .delay-4 { animation-delay: 0.5s; }
+    .delay-5 { animation-delay: 0.65s; }
+
+    /* ── Nav ───────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 60px;
+      background: rgba(245,240,232,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--ink);
+    }
+    .nav-logo-mark {
+      width: 30px; height: 30px;
+      background: var(--ink); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-mark svg { display: block; }
+    .nav-logo-name {
+      font-family: var(--serif);
+      font-size: 20px; font-weight: 500; letter-spacing: 0.02em;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-cta {
+      padding: 8px 20px; border-radius: 8px;
+      background: var(--ink); color: var(--cream) !important;
+      font-size: 13px !important; font-weight: 500;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.85; color: var(--cream) !important; }
+
+    /* ── Hero ──────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 100px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(184,150,90,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(184,150,90,0.07) 0%, transparent 60%);
+    }
+
+    /* Decorative floating lines */
+    .hero-lines {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    }
+    .hero-lines::before {
+      content: '';
+      position: absolute; top: 15%; right: 8%; width: 1px; height: 180px;
+      background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+      animation: drift 6s ease-in-out infinite;
+    }
+    .hero-lines::after {
+      content: '';
+      position: absolute; bottom: 20%; left: 10%; width: 1px; height: 120px;
+      background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+      animation: drift 8s ease-in-out infinite reverse;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid rgba(184,150,90,0.35);
+      background: rgba(184,150,90,0.08);
+      font-size: 11px; font-weight: 500; color: var(--gold);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 28px;
+      position: relative; z-index: 1;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+      position: relative;
+    }
+    .badge-dot::after {
+      content: '';
+      position: absolute; inset: -3px; border-radius: 50%;
+      background: var(--gold);
+      animation: pulse-ring 1.8s ease-out infinite;
+    }
+
+    .hero-headline {
+      font-family: var(--serif);
+      font-size: clamp(52px, 8vw, 88px);
+      font-weight: 300; line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      max-width: 800px;
+      position: relative; z-index: 1;
+      margin-bottom: 10px;
+    }
+    .hero-headline em {
+      font-style: italic; color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--muted); line-height: 1.7;
+      max-width: 480px; margin: 0 auto 40px;
+      position: relative; z-index: 1;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      position: relative; z-index: 1; margin-bottom: 64px;
+    }
+
+    .btn-primary {
+      padding: 14px 32px; border-radius: 10px;
+      background: var(--ink); color: var(--cream);
+      font-size: 14px; font-weight: 500;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { background: #2a2a26; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+
+    .btn-secondary {
+      padding: 14px 32px; border-radius: 10px;
+      background: transparent; color: var(--ink);
+      font-size: 14px; font-weight: 400;
+      text-decoration: none; border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(15,15,13,0.04); }
+
+    .hero-stats {
+      display: flex; gap: 48px; justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-num {
+      font-family: var(--serif); font-size: 36px; font-weight: 400;
+      color: var(--ink); display: block;
+    }
+    .hero-stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+
+    /* ── Proposal Preview ──────────────────────────────────── */
+    .preview-section {
+      padding: 40px 24px 100px; max-width: 900px; margin: 0 auto;
+    }
+    .preview-card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5);
+      overflow: hidden;
+      animation: fadeUp 0.8s ease 0.3s both;
+    }
+    .preview-topbar {
+      background: #f9f7f4; border-bottom: 1px solid #ede8e0;
+      padding: 12px 20px; display: flex; align-items: center; gap: 8px;
+    }
+    .preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .preview-url {
+      flex: 1; text-align: center; font-size: 12px; color: #b0a898;
+      font-family: monospace;
+    }
+    .preview-body { padding: 32px 40px; }
+    .preview-label {
+      font-size: 10px; font-weight: 500; color: var(--gold);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .preview-client {
+      font-family: var(--serif); font-size: 32px; font-weight: 400;
+      color: var(--ink); margin-bottom: 4px;
+    }
+    .preview-meta { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .preview-summary {
+      font-size: 14px; color: #4a4540; line-height: 1.75;
+      padding-bottom: 20px; border-bottom: 1px solid #ede8e0; margin-bottom: 20px;
+    }
+    .preview-deliverables { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .preview-del {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .preview-check {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fdf6ea; border: 1px solid #e8d9b8;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+      font-size: 9px; color: var(--gold); font-weight: 700;
+    }
+    .preview-del-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .preview-del-desc { font-size: 12px; color: var(--muted); }
+    .preview-price-box {
+      background: #fdf6ea; border-radius: 10px;
+      padding: 16px 20px; border: 1px solid #e8d9b8;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .preview-price-label { font-size: 13px; color: #8a6520; }
+    .preview-price-val { font-family: var(--serif); font-size: 24px; color: var(--ink); }
+    .preview-cta {
+      margin-top: 20px; width: 100%; padding: 14px;
+      background: var(--ink); color: #fff; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      font-family: var(--sans);
+    }
+    .preview-footer {
+      padding: 12px 40px; border-top: 1px solid #ede8e0;
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: #c4bdb4;
+    }
+
+    /* ── Section Shared ────────────────────────────────────── */
+    section { padding: 100px 24px; }
+    .section-inner { max-width: 1000px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 500; color: var(--gold);
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(34px, 5vw, 52px);
+      font-weight: 300; line-height: 1.1; letter-spacing: -0.02em;
+      color: var(--ink); margin-bottom: 16px;
+    }
+    .section-title em { font-style: italic; color: var(--gold); }
+    .section-sub {
+      font-size: 15px; color: var(--muted); line-height: 1.7;
+      max-width: 520px; font-weight: 300;
+    }
+
+    /* ── How It Works ──────────────────────────────────────── */
+    .how-section { background: var(--ink); color: var(--cream); }
+    .how-section .section-title { color: var(--cream); }
+    .how-section .section-sub { color: rgba(245,240,232,0.55); }
+
+    .steps {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
+      margin-top: 60px;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+      overflow: hidden;
+    }
+    .step {
+      padding: 32px 28px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.2s;
+    }
+    .step:last-child { border-right: none; }
+    .step:hover { background: rgba(255,255,255,0.04); }
+    .step-num {
+      font-family: var(--serif); font-size: 42px; font-weight: 300;
+      color: rgba(184,150,90,0.3); line-height: 1; margin-bottom: 16px;
+    }
+    .step-title {
+      font-size: 14px; font-weight: 500; color: var(--cream);
+      margin-bottom: 8px;
+    }
+    .step-desc { font-size: 13px; color: rgba(245,240,232,0.5); line-height: 1.6; }
+
+    /* ── Features ──────────────────────────────────────────── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      margin-top: 56px;
+    }
+    .feature-card {
+      background: #fff; border-radius: 14px;
+      padding: 28px; border: 1px solid var(--border);
+      transition: all 0.25s;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.07);
+    }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fdf6ea; border: 1px solid #e8d9b8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 16px;
+    }
+    .feature-title {
+      font-size: 15px; font-weight: 500; color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Flywheel ──────────────────────────────────────────── */
+    .flywheel-section { background: #faf8f4; }
+    .flywheel {
+      display: flex; flex-direction: column; align-items: center;
+      margin-top: 60px; position: relative;
+    }
+    .flywheel-ring {
+      width: 400px; height: 400px; border-radius: 50%;
+      border: 1px dashed rgba(184,150,90,0.3);
+      position: relative; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .flywheel-center {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: var(--ink);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 16px;
+    }
+    .flywheel-center-label {
+      font-family: var(--serif); font-size: 13px; color: var(--cream);
+      line-height: 1.3;
+    }
+    .flywheel-node {
+      position: absolute;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      width: 110px;
+    }
+    .flywheel-node-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #fff; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; margin-bottom: 6px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .flywheel-node-label { font-size: 11px; color: var(--muted); line-height: 1.4; font-weight: 500; }
+
+    /* Position nodes on the ring */
+    .fn-1 { top: -20px; left: 50%; transform: translateX(-50%); }
+    .fn-2 { top: 50%; right: -24px; transform: translateY(-50%); }
+    .fn-3 { bottom: -20px; left: 50%; transform: translateX(-50%); }
+    .fn-4 { top: 50%; left: -24px; transform: translateY(-50%); }
+
+    /* ── Pricing ───────────────────────────────────────────── */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-top: 56px;
+    }
+    .pricing-card {
+      background: #fff; border-radius: 16px;
+      padding: 28px; border: 1px solid var(--border);
+      position: relative;
+    }
+    .pricing-card.featured {
+      border-color: var(--gold); border-width: 2px;
+      background: #fffdf9;
+    }
+    .pricing-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: var(--gold); color: #fff;
+      font-size: 10px; font-weight: 600; padding: 2px 12px; border-radius: 20px;
+      letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+    }
+    .pricing-name { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+    .pricing-price {
+      font-family: var(--serif); font-size: 40px; font-weight: 400;
+      color: var(--ink); margin-bottom: 4px; line-height: 1;
+    }
+    .pricing-period { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+    .pricing-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .pricing-features { list-style: none; margin-bottom: 24px; }
+    .pricing-features li {
+      font-size: 13px; color: #4a4540;
+      padding: 6px 0; border-bottom: 1px solid #f5f2ee;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .pricing-features li::before { content: "✓"; color: var(--gold); font-weight: 600; font-size: 12px; }
+    .pricing-btn {
+      display: block; width: 100%; padding: 12px; border-radius: 10px;
+      text-align: center; text-decoration: none; font-size: 13px; font-weight: 500;
+      transition: all 0.2s; cursor: pointer; border: none; font-family: var(--sans);
+    }
+    .pricing-card.featured .pricing-btn { background: var(--ink); color: var(--cream); }
+    .pricing-card:not(.featured) .pricing-btn {
+      background: transparent; color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    .pricing-card:not(.featured) .pricing-btn:hover { background: var(--warm); }
+
+    /* ── Testimonials ──────────────────────────────────────── */
+    .testimonials-section { background: var(--warm); }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-top: 48px;
+    }
+    .testimonial-card {
+      background: #fff; border-radius: 14px; padding: 24px;
+      border: 1px solid var(--border);
+    }
+    .testimonial-quote {
+      font-family: var(--serif); font-size: 16px; font-weight: 300;
+      font-style: italic; line-height: 1.65; color: var(--ink);
+      margin-bottom: 20px;
+    }
+    .testimonial-author { font-size: 12px; font-weight: 500; color: var(--ink); }
+    .testimonial-role { font-size: 12px; color: var(--muted); }
+    .stars { color: var(--gold); font-size: 12px; margin-bottom: 12px; }
+
+    /* ── Legal / Stripe required ───────────────────────────── */
+    .legal-section {
+      background: #faf8f4;
+      border-top: 1px solid var(--border);
+    }
+    .legal-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px;
+      margin-top: 40px;
+    }
+    .legal-block h3 {
+      font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 12px;
+    }
+    .legal-block p {
+      font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 10px;
+    }
+    .legal-block a { color: var(--gold); text-decoration: none; }
+    .legal-block a:hover { text-decoration: underline; }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    footer {
+      background: var(--ink); color: var(--cream);
+      padding: 60px 24px 40px;
+    }
+    .footer-inner { max-width: 1000px; margin: 0 auto; }
+    .footer-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 48px; padding-bottom: 40px;
+      border-bottom: 1px solid rgba(245,240,232,0.1);
+    }
+    .footer-brand { max-width: 280px; }
+    .footer-logo {
+      font-family: var(--serif); font-size: 22px; font-weight: 400;
+      color: var(--cream); margin-bottom: 12px; display: block;
+    }
+    .footer-tagline { font-size: 13px; color: rgba(245,240,232,0.45); line-height: 1.6; }
+    .footer-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+    .footer-col h4 { font-size: 11px; font-weight: 500; color: rgba(245,240,232,0.4); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 13px; color: rgba(245,240,232,0.6); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--cream); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: rgba(245,240,232,0.3);
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { gap: 16px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .legal-grid { grid-template-columns: 1fr; }
+      .footer-top { flex-direction: column; gap: 32px; }
+      .footer-links { grid-template-columns: 1fr 1fr; }
+      .hero-stats { gap: 28px; }
+      .flywheel-ring { width: 280px; height: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ─────────────────────────────────────────────────── -->
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 14L8 2L13 14" stroke="#d4b07a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="5" y1="9.5" x2="11" y2="9.5" stroke="#d4b07a" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="nav-logo-name">Vela</span>
+  </a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="mailto:support@getvela.com">Support</a>
+    <a href="/login" class="nav-cta">Sign in →</a>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+
+  <div class="hero-badge fade-up">
+    <span class="badge-dot"></span>
+    AI-powered proposal intelligence
+  </div>
+
+  <h1 class="hero-headline fade-up delay-1">
+    Proposals that<br/><em>win more</em><br/>with every send
+  </h1>
+
+  <p class="hero-sub fade-up delay-2">
+    Generate client-ready proposals in 60 seconds. Collect deposits automatically. The more you use Vela, the smarter it gets.
+  </p>
+
+  <div class="hero-actions fade-up delay-3">
+    <a href="/login" class="btn-primary">Start for free →</a>
+    <a href="#how" class="btn-secondary">See how it works</a>
+  </div>
+
+  <div class="hero-stats fade-up delay-4">
+    <div class="hero-stat">
+      <span class="hero-stat-num">60s</span>
+      <span class="hero-stat-label">Avg. generation time</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">2×</span>
+      <span class="hero-stat-label">Faster close time</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">7-day</span>
+      <span class="hero-stat-label">Money-back guarantee</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Proposal Preview ─────────────────────────────────────── -->
+<div class="preview-section">
+  <div class="preview-card">
+    <div class="preview-topbar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">vela.so/proposals/bloom-coffee-brand-identity</div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-label">Proposal for</div>
+      <div class="preview-client">Bloom Coffee Co.</div>
+      <div class="preview-meta">Brand Identity · Prepared by Studio North · May 4, 2026</div>
+      <div class="preview-summary">
+        Bloom Coffee is entering a crowded market where differentiation lives in the brand before it lives in the cup. This proposal outlines a complete visual identity system designed to make Bloom instantly recognizable across retail, digital, and hospitality touchpoints — built to scale from your first location to fifty.
+      </div>
+      <div class="preview-deliverables">
+        <div class="preview-del">
+          <div class="preview-check">✓</div>
+          <div>
+            <div class="preview-del-title">Brand Strategy Document</div>
+            <div class="preview-del-desc">Positioning, audience profiles, and messaging architecture</div>
+          </div>
+        </div>
+        <div class="preview-del">
+          <div class="preview-check">✓</div>
+          <div>
+            <div class="preview-del-title">Visual Identity System</div>
+            <div class="preview-del-desc">Logo suite, color palette, typography, and iconography</div>
+          </div>
+        </div>
+        <div class="preview-del">
+          <div class="preview-check">✓</div>
+          <div>
+            <div class="preview-del-title">Brand Guidelines + Asset Pack</div>
+            <div class="preview-del-desc">40-page guide plus all files in web, print, and social formats</div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-price-box">
+        <div>
+          <div class="preview-price-label">Professional Package</div>
+          <div style="font-size:11px;color:#c8a96e;margin-top:2px">50% deposit to commence</div>
+        </div>
+        <div class="preview-price-val">$14,400</div>
+      </div>
+      <button class="preview-cta">Pay $7,200 Deposit & Accept Proposal →</button>
+    </div>
+    <div class="preview-footer">
+      <span>Prepared by Studio North</span>
+      <span>Created with Vela · getvela.com</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── How It Works ─────────────────────────────────────────── -->
+<section class="how-section" id="how">
+  <div class="section-inner">
+    <div class="section-label" style="color:rgba(184,150,90,0.7)">How it works</div>
+    <h2 class="section-title">From brief to paid<br/>in four steps</h2>
+    <p class="section-sub">No templates to fill. No formatting to fight. Just describe the project and Vela handles the rest.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Fill the brief</div>
+        <div class="step-desc">Client name, project type, scope, budget range. 2 minutes, no templates.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">AI generates</div>
+        <div class="step-desc">Claude builds a full proposal — summary, deliverables, phases, pricing. 60 seconds.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Client reviews</div>
+        <div class="step-desc">They get a branded link. Vela tracks opens, time-on-page, and forwards.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Deposit collected</div>
+        <div class="step-desc">They accept and pay via Stripe. Money hits your account before work starts.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ─────────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything a boutique<br/>agency actually needs</h2>
+    <p class="section-sub">Built around the real workflow — not a feature checklist.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">✦</div>
+        <div class="feature-title">AI Proposal Generation</div>
+        <div class="feature-desc">Describe the project in plain English. Vela writes the executive summary, deliverables, phases, and pricing in 60 seconds — in your agency's voice.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Proposal Strength Scoring</div>
+        <div class="feature-desc">Every proposal gets a 0–100 score before you send. Vela flags weak spots — vague deliverables, mismatched scope, generic language — and tells you how to fix them.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <div class="feature-title">Stripe Deposit Collection</div>
+        <div class="feature-desc">Clients accept and pay a 50% deposit in the same flow. No separate invoice. No chasing. Money in your account before work begins.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📨</div>
+        <div class="feature-title">Smart Follow-up Sequencer</div>
+        <div class="feature-desc">Vela drafts follow-up emails at day 2, 5, and 10. Each one tailored — light check-in, value-add, graceful close. Approve with one click.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">Agency Voice Learning</div>
+        <div class="feature-desc">The more proposals you send, the more Vela learns your style, pricing patterns, and what wins. Every new proposal is better than the last.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">Revenue Intelligence</div>
+        <div class="feature-desc">Win rate by project type, avg close time, channel attribution, loss reason analysis. Know exactly where your pipeline is leaking and how to fix it.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-title">Win-Rate Indexed Templates</div>
+        <div class="feature-desc">Start from proven structures, not blank pages. Templates are ranked by actual win rates across the platform — not just by design.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👁</div>
+        <div class="feature-title">Proposal Tracking</div>
+        <div class="feature-desc">Know the moment your client opens the proposal. See how long they spent on pricing. Get notified when they forward it to a colleague.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📄</div>
+        <div class="feature-title">Branded PDF Export</div>
+        <div class="feature-desc">One click to a print-ready, professionally typeset PDF — with your agency name, colors, and logo. Ready to attach to any email.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Flywheel ──────────────────────────────────────────────── -->
+<section class="flywheel-section">
+  <div class="section-inner" style="text-align:center">
+    <div class="section-label">The intelligence flywheel</div>
+    <h2 class="section-title">Gets smarter<br/>every time you <em>win</em></h2>
+    <p class="section-sub" style="margin:0 auto">Every outcome you record trains Vela to generate better proposals. Every agency on the platform makes the benchmarks more accurate for everyone.</p>
+
+    <div class="flywheel">
+      <div class="flywheel-ring">
+        <div class="flywheel-center">
+          <div class="flywheel-center-label">Smarter<br/>with every<br/>proposal</div>
+        </div>
+
+        <div class="flywheel-node fn-1">
+          <div class="flywheel-node-dot">✦</div>
+          <div class="flywheel-node-label">Generate proposal</div>
+        </div>
+        <div class="flywheel-node fn-2">
+          <div class="flywheel-node-dot">📨</div>
+          <div class="flywheel-node-label">Send & track opens</div>
+        </div>
+        <div class="flywheel-node fn-3">
+          <div class="flywheel-node-dot">✓</div>
+          <div class="flywheel-node-label">Record outcome</div>
+        </div>
+        <div class="flywheel-node fn-4">
+          <div class="flywheel-node-dot">🧠</div>
+          <div class="flywheel-node-label">Model improves</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ─────────────────────────────────────────── -->
+<section class="testimonials-section">
+  <div class="section-inner">
+    <div class="section-label">What agencies say</div>
+    <h2 class="section-title">Built for agencies<br/>who close deals</h2>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-quote">"I used to spend half a Sunday writing proposals. Now I generate three in the time it took me to write one. The quality is genuinely better than what I was producing manually."</div>
+        <div class="testimonial-author">Sarah K.</div>
+        <div class="testimonial-role">Brand designer, 6 years freelance</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-quote">"The proposal tracking feature alone is worth it. Knowing the moment a client opens it — and seeing they spent 8 minutes on the pricing section — completely changed how I follow up."</div>
+        <div class="testimonial-author">Marcus T.</div>
+        <div class="testimonial-role">Creative director, boutique agency</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <div class="testimonial-quote">"We went from a 40% close rate to 65% in three months. The strength scoring caught things I'd been doing wrong for years — leading with our process instead of their outcome."</div>
+        <div class="testimonial-author">Priya M.</div>
+        <div class="testimonial-role">Founder, 4-person design studio</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ───────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">One closed project covers<br/>months of subscription</h2>
+    <p class="section-sub">Simple, flat pricing. No per-user fees. Cancel any time. 7-day money-back guarantee.</p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Solo</div>
+        <div class="pricing-price">$49</div>
+        <div class="pricing-period">per month</div>
+        <div class="pricing-desc">For freelancers and one-person studios getting started with smarter proposals.</div>
+        <ul class="pricing-features">
+          <li>10 proposals per month</li>
+          <li>AI generation + scoring</li>
+          <li>Stripe deposit collection</li>
+          <li>PDF export</li>
+          <li>Proposal tracking</li>
+          <li>Win/loss capture</li>
+        </ul>
+        <a href="/login" class="pricing-btn">Get started →</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most popular</div>
+        <div class="pricing-name">Professional</div>
+        <div class="pricing-price">$99</div>
+        <div class="pricing-period">per month</div>
+        <div class="pricing-desc">The full flywheel. Proposals that learn, follow up automatically, and tell you why you win.</div>
+        <ul class="pricing-features">
+          <li>Unlimited proposals</li>
+          <li>Everything in Solo</li>
+          <li>Automated follow-up sequencer</li>
+          <li>Intelligence report</li>
+          <li>Brand kit + voice learning</li>
+          <li>Gmail integration</li>
+          <li>Revenue analytics</li>
+        </ul>
+        <a href="/login" class="pricing-btn">Get started →</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-name">Studio</div>
+        <div class="pricing-price">$199</div>
+        <div class="pricing-period">per month</div>
+        <div class="pricing-desc">For agencies with multiple proposal senders and a need for white-label client experiences.</div>
+        <ul class="pricing-features">
+          <li>Everything in Professional</li>
+          <li>5 team seats</li>
+          <li>White-label client portal</li>
+          <li>Shared template library</li>
+          <li>Team win rate analytics</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="/login" class="pricing-btn">Get started →</a>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:24px">
+      Annual billing available at 20% off. <a href="/login" style="color:var(--gold)">Sign in to see annual pricing →</a>
+    </p>
+  </div>
+</section>
+
+<!-- ── Legal / Stripe Required Section ──────────────────────── -->
+<section class="legal-section" id="legal">
+  <div class="section-inner">
+    <div class="section-label">Business information</div>
+    <h2 class="section-title" style="font-size:28px;margin-bottom:8px">Our commitment to you</h2>
+    <p class="section-sub">Vela is a subscription software service. Here's what you're agreeing to when you sign up.</p>
+
+    <div class="legal-grid">
+      <div class="legal-block">
+        <h3>What you're paying for</h3>
+        <p>Vela is a monthly or annual software subscription for AI-powered proposal generation, tracking, and revenue analytics. You are charged on a recurring basis at the rate of the plan you select ($49, $99, or $199/month, or annual equivalents).</p>
+        <p>All charges are processed securely through Stripe. You will see "Vela" or "Vela HQ Inc." on your bank or card statement.</p>
+      </div>
+
+      <div class="legal-block">
+        <h3>Cancellation & refunds</h3>
+        <p>You can cancel your subscription at any time from your billing dashboard. Cancellation takes effect at the end of your current billing period — you retain full access until then.</p>
+        <p>We offer a <strong>7-day money-back guarantee</strong> on all plans. If you're not satisfied within the first 7 days, email <a href="mailto:billing@getvela.com">billing@getvela.com</a> for a full refund, no questions asked.</p>
+      </div>
+
+      <div class="legal-block">
+        <h3>Delivery of service</h3>
+        <p>Vela is a software-as-a-service product delivered via web browser. Access is granted immediately upon payment confirmation. There is no physical product and no shipping involved.</p>
+        <p>Service availability is 99.9% uptime target. For planned maintenance, you'll receive at least 24 hours notice by email.</p>
+      </div>
+
+      <div class="legal-block">
+        <h3>Your data & privacy</h3>
+        <p>Your proposal data, client information, and agency profile are stored securely and never sold to third parties. AI generation uses the Anthropic Claude API — proposal content is not used to train Anthropic's models.</p>
+        <p>See our full <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Service</a> for complete details. Contact us at <a href="mailto:support@getvela.com">support@getvela.com</a> with any questions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────── -->
+<section style="background:var(--ink);text-align:center;padding:100px 24px">
+  <div style="max-width:600px;margin:0 auto">
+    <div style="font-size:11px;color:rgba(184,150,90,0.7);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:20px">Start today</div>
+    <h2 style="font-family:var(--serif);font-size:clamp(36px,6vw,60px);font-weight:300;color:var(--cream);line-height:1.1;letter-spacing:-0.02em;margin-bottom:16px">
+      Your next proposal<br/>takes <em style="color:var(--gold)">60 seconds</em>
+    </h2>
+    <p style="font-size:15px;color:rgba(245,240,232,0.5);margin-bottom:36px;line-height:1.7;font-weight:300">
+      Join agencies closing more business with less time spent on paperwork.
+    </p>
+    <a href="/login" class="btn-primary" style="font-size:15px;padding:16px 40px">
+      Get started free →
+    </a>
+    <div style="margin-top:20px;font-size:12px;color:rgba(245,240,232,0.3)">
+      7-day money-back guarantee · No credit card required to start
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="footer-logo">Vela</span>
+        <div class="footer-tagline">AI-powered proposal intelligence for boutique creative agencies. Generate, track, and close — smarter every time.</div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="/login">Sign in</a>
+          <a href="/login">Get started</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/about">About</a>
+          <a href="/blog">Blog</a>
+          <a href="mailto:support@getvela.com">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="/terms">Terms of Service</a>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/legal#refunds">Refund Policy</a>
+          <a href="mailto:billing@getvela.com">Billing support</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Vela HQ Inc. All rights reserved.</span>
+      <span>support@getvela.com · getvela.com</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
